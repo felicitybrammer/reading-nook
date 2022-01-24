@@ -9,6 +9,7 @@ import { useMutation } from '@apollo/client';
 
 
 const SearchBooks = () => {
+  const [saveBook] = useMutation(SAVE_BOOK)
   // create state for holding returned google api data
   const [searchedBooks, setSearchedBooks] = useState([]);
   // create state for holding our search field data
@@ -16,7 +17,7 @@ const SearchBooks = () => {
 
   // create state to hold saved bookId values
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
-  const [saveBook] = useMutation(SAVE_BOOK)
+  
   // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
   // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
   useEffect(() => {
@@ -56,7 +57,7 @@ const SearchBooks = () => {
   };
 
   // create function to handle saving a book to our database
-  const handleSaveBook = (bookId) => {
+  const handleSaveBook = async (bookId) => {
     // find the book in `searchedBooks` state by the matching id
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
     
@@ -67,20 +68,27 @@ const SearchBooks = () => {
       return false;
     }
 
-  
       //const response = await saveBook(bookToSave, token); //remove saveBook function
-     saveBook({
-        variables: { bookToSave, token },
-        onError: (err) => new Error(err),
-        onCompleted: () => setSavedBookIds([...savedBookIds, bookToSave.bookId])
-    
+    //  saveBook({
+    //     variables: { input: bookToSave },
+    //     onError: (err) => new Error(err),
+    //     onCompleted: () => setSavedBookIds([...savedBookIds, bookToSave.bookId])
+    //   });
+    try {
+      await saveBook( {
+            variables:
+                { input: bookToSave },
+            // onError:(err)=>{
+            //     //console.log(err);
+            //     throw new Error('something went wrong! '+ err);
+            // }
       });
 
-      
-
       // if book successfully saves to user's account, save book id to state
-      
-    
+      setSavedBookIds([...savedBookIds, bookToSave.bookId]);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (

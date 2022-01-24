@@ -5,11 +5,14 @@ import { useMutation } from '@apollo/client';
 //import { loginUser } from '../utils/API';
 import Auth from '../utils/auth';
 import { LOGIN_USER } from '../utils/mutations';
+
 const LoginForm = () => {
   const [userFormData, setUserFormData] = useState({ email: '', password: '' });
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+
   const [loginUser] = useMutation(LOGIN_USER);
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setUserFormData({ ...userFormData, [name]: value });
@@ -26,16 +29,33 @@ const LoginForm = () => {
     }
 
     
-      loginUser({
-        variables: { userFormData },
-        onError: (err) => new Error(err),
-        onCompleted: ({ token, user: userResponse }) => {
-          const user = userResponse.json();
-          //console.log(userResponse)
-          Auth.login(token)
-        }
+      // loginUser({
+      //   variables: { ...userFormData },
+      //   onError: (err) => new Error(err),
+      //   onCompleted: ({ token, user: userResponse }) => {
+      //     userResponse.json();
+      //     //console.log(userResponse)
+      //     Auth.login(token)
+      //   }
 
+      // })
+
+      await loginUser({
+        variables: { ...userFormData },
+        onError: (err) => {
+            throw new Error('something went wrong! ' + err);
+        }
       })
+      .then(response => {
+        console.log(response);
+        const {user, token} = response.data.login;
+              console.log(user);
+              Auth.login(token);
+      })
+      .catch(err=> {   
+          console.error(err);
+          setShowAlert(true);
+      });
       
 
      

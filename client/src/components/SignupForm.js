@@ -12,7 +12,8 @@ const SignupForm = () => {
   const [validated] = useState(false);
   // set state for alert
   const [showAlert, setShowAlert] = useState(false);
-  const [createUser] = useMutation(ADD_USER);
+  const [addUser] = useMutation(ADD_USER);
+  
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setUserFormData({ ...userFormData, [name]: value });
@@ -28,23 +29,38 @@ const SignupForm = () => {
       event.stopPropagation();
     }
 
-    
-      createUser({
-        variables: { userFormData },
-        onError: (err) => new Error(err),
-        onCompleted: ({ token, user: userResponse }) => {
-          const user = userResponse.json();
-          //console.log(userResponse)
-          Auth.login(token)
-        }
+    // addUser({
+    //   variables: { ...userFormData },
+    //   onError: (err) => new Error(err),
+    //   onCompleted: ({ token, user: userResponse }) => {
+    //     userResponse.json();
+    //     //console.log(userResponse)
+    //     Auth.login(token)
+    //   }
+    // })
 
-      })
+    await addUser({
+      variables: { ...userFormData },
+      onError: (err) => {
+          throw new Error('something went wrong! ' + err);
+      }
+    })
+    .then(response => {
+      console.log(response);
+      const {user, token} = response.data.addUser;
+            console.log(user);
+            Auth.login(token);
+    })
+    .catch(err=> {   
+        console.error(err);
+        setShowAlert(true);
+    });
 
-      setUserFormData({
-        username: '',
-        email: '',
-        password: '',
-      });
+    setUserFormData({
+      username: '',
+      email: '',
+      password: '',
+    });
   };
 
   return (
