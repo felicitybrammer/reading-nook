@@ -60,37 +60,29 @@ const SearchBooks = () => {
   const handleSaveBook = async (bookId) => {
     // find the book in `searchedBooks` state by the matching id
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
-    
     // get token
     const token = Auth.loggedIn() ? Auth.getToken() : null;
-
+    console.log('this is the token ', token, Auth.loggedIn());
+    //console.log(token) -  works
     if (!token) {
       return false;
     }
 
-      //const response = await saveBook(bookToSave, token); //remove saveBook function
+    try {
+      await saveBook({variables:{ input: bookToSave }})
+      // if book successfully saves to user's account, save book id to state
+      console.log(bookToSave) //works!
+      setSavedBookIds([...savedBookIds, bookToSave.bookId]);  //saved in localstorage
+    } catch (err) {
+      console.error(err);
+    }
+  };
+   //const response = await saveBook(bookToSave, token); //remove saveBook function
     //  saveBook({
     //     variables: { input: bookToSave },
     //     onError: (err) => new Error(err),
     //     onCompleted: () => setSavedBookIds([...savedBookIds, bookToSave.bookId])
     //   });
-    try {
-      await saveBook( {
-            variables:
-                { input: bookToSave },
-            // onError:(err)=>{
-            //     //console.log(err);
-            //     throw new Error('something went wrong! '+ err);
-            // }
-      });
-
-      // if book successfully saves to user's account, save book id to state
-      setSavedBookIds([...savedBookIds, bookToSave.bookId]);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   return (
     <>
       <Jumbotron fluid className='text-light bg-dark'>

@@ -8,17 +8,18 @@ const resolvers = {
             if (context.user) {
                 const userData = await User.findOne({ _id: context.user._id })
                     .select('-__v -password')
-                    //.populate('savedBooks');
+                    .populate('savedBooks');
 
                 return userData;
             }
             throw new AuthenticationError('Not logged in!');
-        },
+        
         // user: async (parent, { username }) => {
         //     return User.findOne({ username })
         //         .select('-__v -password')
         //         .populate('savedBooks');
         // },
+        }
     },
     Mutation: {
         addUser: async (parent, args) => {
@@ -41,27 +42,29 @@ const resolvers = {
             }
       
             const token = signToken(user);
+            console.log(token)
             return { token, user };
           },
 
         saveBook: async (parent, { input }, context) => {
-            if (context.user) {
+            console.log(context)
 
-                const updatedUser = await User.findOneAndUpdate(
+            if (context.user) {
+                const updatedUser = await User.findByIdAndUpdate(
                     { _id: context.user._id },
                     { $addToSet: { savedBooks: input } },
-                    { new: true }
-                    
-                );
+                    { new: true }   
+                ); // error: cannot read property _id of undefined
                 
                 updatedUser['bookCount'] = updatedUser.savedBooks.length;
-                return updatedUser;
+               
+                return updatedUser; 
             }
-            
             throw new AuthenticationError('You need to be logged in!');
         },
 
         removeBook: async (parent, { user }, context) => {
+    
             if (context.user) {
                   const updatedUser = await User.findOneAndUpdate(
                     { _id: context.user._id },
@@ -74,6 +77,6 @@ const resolvers = {
         },
   
     }
-};
+}
 
 module.exports = resolvers;
