@@ -4,14 +4,24 @@ import SearchBooks from './pages/SearchBooks';
 import SavedBooks from './pages/SavedBooks';
 import Navbar from './components/Navbar';
 import { ApolloProvider, ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context'
+import Auth from './utils/auth';
 
 const httpLink = createHttpLink({
   uri: 'http://localhost:3001/graphql',
 });
 
-
+const authLink = setContext((_, {headers}) => {
+  const token = Auth.loggedIn() ? Auth.getToken() : null;
+  return {
+    headers: {
+      ...headers, 
+      authorization: `Bearer ${token}` 
+    }
+  }
+} )
 const client = new ApolloClient({
-  link: httpLink,
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
 });
 
