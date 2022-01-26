@@ -14,7 +14,7 @@ This application was refactored from a fully functioning RESTful API.
 * JavaScript
 ## Deployed Application
 
-https://immense-ravine-96731.herokuapp.com/
+https://peaceful-tor-40781.herokuapp.com/
 
 ## Screenshot
 
